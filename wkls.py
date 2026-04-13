@@ -98,33 +98,39 @@ def main() -> None:
     use_timestamp: bool = "-t" in sys.argv or "--timestamp" in sys.argv
 
     if use_timestamp:
-        # Add a timestamp to the clipboard
+        # Add a new timestamp to the clipboard
         timestamp: str = datetime.datetime.now().strftime(timestamp_format)
-        subprocess.run(['/usr/bin/wl-copy'], input=timestamp.encode('utf-8'), check=True)
-        notify("Switcher: New Timestamp Added", timestamp)
+        subprocess.run(['wl-copy'], input=timestamp.encode('utf-8'), check=True)
+        notify("WKLS: Timestamp", f"New Timestamp \"{timestamp}\" Added")
         return
 
     # Convert selected text otherwise
     try:
-        # Get selected text (primary clipboard, without newline)
-        result = subprocess.run(['/usr/bin/wl-paste', '-p', '-n'], capture_output=True, text=True, check=True)
+        # Get selected text (primary clipboard, without line feed)
+        result = subprocess.run(['wl-paste', '-p', '-n'], capture_output=True, text=True, check=False)
         selected: str = result.stdout
-        
-        if not selected: sys.exit(0)
+
+        if not selected:
+            # Nothing is selected
+            notify("WKLS: Error", "No text selected (Ctrl+A fails in some apps)")
+            return
 
         # Convert keyboard layout
         converted: str = switch_layout(selected)
 
         if converted != selected:
-            # Paste to the clipboard and notify
-            subprocess.run(['/usr/bin/wl-copy'], input=converted.encode('utf-8'), check=True)
+            # Paste to the clipboard
+            subprocess.run(['wl-copy'], input=converted.encode('utf-8'), check=True)
+
+            # Clear primary selection clipboard
+            subprocess.run(['wl-copy', '-p'], input=b'', check=False)
             
             # Show a short preview in the notification
             preview = converted if len(converted) <= 30 else converted[:27] + "..."
-            notify("Switcher: Text Converted", preview)
+            notify("WKLS: Text Converted", preview)
 
     except Exception as e:
-        print(f"Error: {e}")
+        notify("WKLS: Exception", e)
 
 
 if __name__ == "__main__":

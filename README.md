@@ -81,3 +81,4 @@ The script is highly customizable. You can easily add new languages or change ho
 
 * **Wayland Only:** This script relies on `wl-clipboard`, making it a native Wayland solution. It will not work on X11 sessions out of the box (though you could adapt it using `xclip`).
 * **Security:** Unlike older X11 tools, WKLS does not require root privileges, `ydotool` daemons, or adding your user to the `input` group. It securely manipulates text solely through standard clipboard protocols.
+* **The `Ctrl+A` Quirk:** WKLS reads text directly from the Wayland *Primary Selection* (text that is currently highlighted on your screen). Be aware that certain applications (like Firefox, particularly in the URL bar) intentionally block the `Ctrl+A` shortcut from updating the Primary Selection to prevent accidental clipboard overwriting. If WKLS notifies you that no text is selected after using `Ctrl+A`, simply highlight the text using your mouse or `Shift + Arrow keys` instead.
